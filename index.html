@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Envato Downloader</title>
+</head>
+<body>
+    <h1>Envato Downloader</h1>
+    <form id="downloadForm">
+        <label for="envatoUrl">Envato URL:</label>
+        <input type="text" id="envatoUrl" name="envatoUrl" required>
+        <button type="submit">Download</button>
+    </form>
+    <p id="downloadLink"></p>
+
+    <script>
+        document.getElementById('downloadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const envatoUrl = document.getElementById('envatoUrl').value;
+            const response = await fetch('/download', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ envatoUrl })
+            });
+            const result = await response.json();
+            if (result.downloadUrl) {
+                document.getElementById('downloadLink').innerHTML = `<a href="${result.downloadUrl}" target="_blank">Click here to download</a>`;
+            } else {
+                document.getElementById('downloadLink').innerText = 'Error: ' + result.error;
+            }
+        });
+    </script>
+</body>
+</html>
