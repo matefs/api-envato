@@ -38,7 +38,7 @@ app.post('/download', async (req, res) => {
     await page.setCookie(...cookies);
 
     console.log('Navigating to Envato URL...');
-    await page.goto(envatoUrl, { waitUntil: 'networkidle2' });
+    await page.goto(envatoUrl, { waitUntil: 'networkidle2', timeout: 60000 }); // Aumentando o tempo limite para 60 segundos
 
     console.log('Waiting for download button...');
     await page.waitForSelector('button[data-testid="action-bar-download-button"]');
@@ -50,9 +50,9 @@ app.post('/download', async (req, res) => {
 
     console.log('Setting request interception...');
     await page.setRequestInterception(true);
-
+    
     let downloadUrl = '';
-
+    
     page.on('request', async request => {
       const url = request.url();
       if (url.indexOf('download') > -1 && !url.includes('download_and_license') && !url.includes('facebook')) {
