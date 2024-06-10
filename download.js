@@ -11,7 +11,7 @@ app.use(express.json());
 
 // Servir o arquivo HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
 // Servir o arquivo HTML
