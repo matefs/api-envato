@@ -6,21 +6,15 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3005;
 
-// Middleware para ler JSON do body da requisição
+// Middleware to parse JSON from the request body
 app.use(express.json());
 
-// Servir o arquivo HTML
+// Serve the HTML file
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '/public/index.html'));
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-
-// Endpoint para retornar uma mensagem JSON
-app.get('/mateus', (req, res) => {
-  res.json({ mensagem: 'Tudo funcionando' });
-});
-
-// Endpoint para lidar com a URL do Envato
+// Endpoint to handle Envato URL
 app.post('/download', async (req, res) => {
   const { envatoUrl } = req.body;
 
@@ -29,15 +23,25 @@ app.post('/download', async (req, res) => {
     return res.status(400).json({ error: 'Envato URL is required' });
   }
 
+  let browser;
   try {
     console.log('Reading cookies file...');
     const cookies = JSON.parse(fs.readFileSync('cookies.json', 'utf8'));
 
     console.log('Launching Puppeteer...');
-    const browser = await puppeteer.launch({
+    browser = await puppeteer.launch({
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-zygote',
+        '--single-process', // Single process (useful for server environments)
+        '--disable-gpu'
+      ]
     });
+
     const page = await browser.newPage();
 
     console.log('Setting cookies...');
@@ -61,12 +65,12 @@ app.post('/download', async (req, res) => {
 
     page.on('request', async request => {
       const url = request.url();
-      if (url.indexOf('download') > -1 && !url.includes('download_and_license') && !url.includes('facebook')) {
+      if (url.includes('download') && !url.includes('download_and_license') && !url.includes('facebook')) {
         downloadUrl = url;
-        console.log('Download URL:', downloadUrl); // Depuração
-        await request.abort(); // Aborta a requisição para não prosseguir com o download
-        await browser.close(); // Fecha o navegador
-        return res.json({ downloadUrl }); // Retorna o link de download na resposta da API
+        console.log('Download URL:', downloadUrl);
+        await request.abort(); // Abort the request to avoid downloading the file
+        await browser.close(); // Close the browser
+        return res.json({ downloadUrl }); // Return the download link in the API response
       } else {
         request.continue();
       }
@@ -74,6 +78,7 @@ app.post('/download', async (req, res) => {
 
   } catch (error) {
     console.error('Error during processing:', error);
+    if (browser) await browser.close(); // Ensure browser is closed on error
     res.status(500).json({ error: 'An error occurred while processing your request' });
   }
 });
