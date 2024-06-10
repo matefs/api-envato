@@ -14,6 +14,11 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Servir o arquivo HTML
+app.get('/mateus', (req, res) => {
+  res.send('Tudo funcionando')
+});
+
 // Endpoint para lidar com a URL do Envato
 app.post('/download', async (req, res) => {
   const { envatoUrl } = req.body;
