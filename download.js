@@ -14,9 +14,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '/public/index.html'));
 });
 
-// Servir o arquivo HTML
+
+// Endpoint para retornar uma mensagem JSON
 app.get('/mateus', (req, res) => {
-  res.send('Tudo funcionando')
+  res.json({ mensagem: 'Tudo funcionando' });
 });
 
 // Endpoint para lidar com a URL do Envato
