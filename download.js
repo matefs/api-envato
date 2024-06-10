@@ -28,17 +28,14 @@ app.post('/download', async (req, res) => {
     const cookies = JSON.parse(fs.readFileSync('cookies.json', 'utf8'));
 
     console.log('Launching Puppeteer...');
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
     console.log('Setting cookies...');
     await page.setCookie(...cookies);
 
     console.log('Navigating to Envato URL...');
-    await page.goto(envatoUrl, { waitUntil: 'networkidle2', timeout: 60000 }); // Aumentando o tempo limite para 60 segundos
+    await page.goto(envatoUrl);
 
     console.log('Waiting for download button...');
     await page.waitForSelector('button[data-testid="action-bar-download-button"]');
